@@ -31,8 +31,6 @@ let next = document.querySelector(".next")
 // PAGINATION
 
 form.addEventListener("submit", (e) => {
-  e.preventDefault();
-
   if (
     !inpTitle.value.trim() ||
     !inpImg.value.trim() ||
@@ -50,11 +48,12 @@ let newCard = {
   trailer: inpTrailer.value,
   category: inpCategory.value,
 };
+// creating a new object with the values that we have received in inputs
 createCard(newCard)
 readCard()
 });
 
-// ! Create - adding new products
+// ! Create - adding new movies
 
 async function createCard(creatingCard) {
   await fetch(API,{
@@ -69,8 +68,8 @@ async function createCard(creatingCard) {
   inpDesc.value = "";
   inpTrailer.value = "";
   inpCategory.value = "Age";
+  // очистка инпутов
   readCard()
-
 }
 
 
@@ -78,13 +77,19 @@ async function createCard(creatingCard) {
 async function readCard(){
   let res = await fetch(`${API}?q=${searchVal}&_page=${currentPage}&_limit=3`);
 
-  let data = await res.json();
+// GET-request to the specified API-end with the specified parameters
+// and saves the answer object in the variable res,
+// so that the data can be further processed.
 
+let data = await res.json();
+// распарсенные данные JSON, полученные из ответа сервера после вызова res.json()
   cardsContainer.innerHTML = "";
   movieList.innerHTML = "";
 
-  
+  // cleaning in order to get blank when we are adding new movie
+
   data.forEach(elem => {
+    // everytime we add new movie we are displaying the information that we get from user
     cardsContainer.innerHTML +=`
     <div class="draw">
             <div class="card" style="width: 23rem; height: auto">
@@ -100,15 +105,15 @@ async function readCard(){
                 <p>${elem.category}</p>
                 <p class="card-text"> ${elem.description}  </p>
                 <button onclick="showModalEdit(${elem.id})" style="color: white;
-                background-color: rgb(141, 36, 36);
+                background-color: #09094c;
                 border: none;
                 border-radius: 5px;
                 width: 40%;" class="btn btn-edit">Edit</button>
                 <button onclick="deleteCard(${elem.id})" style="color: white;
-                background-color: rgb(141, 36, 36);
+                background-color: #09094c;
                 border: none;
                 border-radius: 5px;
-                width: 40%;"  class="btn"  >Delete</button>
+                width: 40%;"  class="btn">Delete</button>
               </div>
             </div>      
           </div>
@@ -120,7 +125,7 @@ readCard()
 function redirectToTrailer(trailerUrl) {
   window.location.href = trailerUrl;
 }
-
+// window.location - let us to get url of the current page
 
 //! DELETE
    async function deleteCard(id) {
@@ -129,10 +134,10 @@ function redirectToTrailer(trailerUrl) {
     });
     readCard()
    };
-
    
 
   // ! EDIT
+  // getting elements to edit
   let modal = document.querySelector("#modalEdit");
 let closeBtn = document.querySelector("#closeEditModal");
 let editInpName = document.querySelector("#editInpTitle");
@@ -147,18 +152,21 @@ async function showModalEdit(id) {
   modal.style.display = "block";
   let res = await fetch(`${API}/${id}`);
   let data = await res.json();
+
+  // we can see in console the information of which card we are going to edit
   console.log(data);
+
   editInpName.value = data.title;
   editInpImage.value = data.image;
   editInpTrailer.value = data.trailer;
   editInpDesc.value = data.description;
   editInpCategory.value = data.category;
   btnSave.setAttribute("id", data.id);
+  // setting new information after the editing depending on what we have received in promise
 }
 
 
 editForm.addEventListener("submit", (e) => {
-  e.preventDefault();
   let editedCard = {
     title: editInpName.value,
     image: editInpImage.value,
@@ -166,10 +174,12 @@ editForm.addEventListener("submit", (e) => {
     description: editInpDesc.value,
     category: editInpCategory.value,
   };
-  console.log(btnSave.id);
+  // reseting the card with new edited information
+  
   editCardFunc(editedCard, btnSave.id);
 });
 
+// editCardFunc contains object with the udpated info. Sends the updated card to the server, close the editModal and display it on our website
 async function editCardFunc(editedCard, id) {
   try {
     await fetch(`${API}/${id}`, {
@@ -191,19 +201,15 @@ closeBtn.addEventListener("click", () => {
   modal.style.display = "none";
 });
 
-// FILTER
-inpCategory.addEventListener("click",()=>{
-  categoryValue = value;
-  readCard()
-})
 
 
 // SEARCH
 searchInp.addEventListener("input", () => {
   searchVal = searchInp.value;
   readCard();
+  // the value of the text intered into searchInp is saved in searchVal
+  // and it's look for that value in the code above (let res)
 });
-
 
 // SEARCH
 
@@ -213,7 +219,11 @@ function drawPaginationButtons() {
     .then((res)=> res.json())
     .then((data)=> {
       pageTotalCount = Math.ceil(data.length/3);
+      // devides pages by 3 movies, and if we have one more it will appear on the next page
       paginationList.innerHTML = "" 
+      // is used to clean the paginationList element content 
+      // to remove previous pagination buttons 
+      // before creating and adding new buttons to drawPaginationButtons() function.
       for(let i =1; i<=pageTotalCount; i++){
         if(currentPage==i){
           let page =document.createElement('li')
@@ -262,13 +272,13 @@ function drawPaginationButtons() {
   });
 
 readCard();
+
 function changePage(pageNumber) {
   currentPage = pageNumber;
   readCard()
+  // Assigns the currentPage variable a pageNumber value,
+  //  that is, sets the current page to the specified page number.
 }
-
-
-
 
 // FILTER
 // функция для фильтрации по категориям
